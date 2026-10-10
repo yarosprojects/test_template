@@ -1,0 +1,1106 @@
+<div
+    id="driving-quiz"
+    class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-12"
+>
+    <section
+        class="quiz-header mb-8 flex flex-wrap items-center justify-between gap-4"
+    >
+        <div>
+            <p
+                class="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-blue-600"
+            >
+                Simulador de examen
+            </p>
+            <h1
+                id="exam-title"
+                class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+            >
+                Examen teórico
+            </h1>
+            <p class="mt-2 text-sm text-slate-500">
+                Practica, aprende y comprueba tu resultado.
+            </p>
+        </div>
+        <span
+            class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600"
+            >RA-1</span
+        >
+    </section>
+    <div id="quiz-app" aria-live="polite"></div>
+</div>
+
+<style>
+    #driving-quiz {
+        --quiz-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .quiz-header {
+        animation: quiz-fade-down 0.6s var(--quiz-ease) both;
+    }
+
+    .quiz-card,
+    .quiz-result {
+        animation: quiz-card-enter 0.55s var(--quiz-ease) both;
+    }
+
+    .quiz-condition {
+        animation: quiz-fade-up 0.5s 0.08s var(--quiz-ease) both;
+    }
+
+    .quiz-stat {
+        animation: quiz-fade-up 0.5s var(--quiz-ease) both;
+        transition:
+            transform 0.25s var(--quiz-ease),
+            box-shadow 0.25s ease;
+    }
+
+    .quiz-stat:nth-child(2) {
+        animation-delay: 0.08s;
+    }
+
+    .quiz-stat:nth-child(3) {
+        animation-delay: 0.16s;
+    }
+
+    .quiz-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px #0f172a12;
+    }
+
+    .quiz-option {
+        animation: quiz-fade-up 0.4s var(--quiz-ease) both;
+        transition:
+            transform 0.22s var(--quiz-ease),
+            border-color 0.22s ease,
+            background-color 0.22s ease,
+            box-shadow 0.22s ease;
+    }
+
+    .quiz-option:nth-child(2) {
+        animation-delay: 0.05s;
+    }
+
+    .quiz-option:nth-child(3) {
+        animation-delay: 0.1s;
+    }
+
+    .quiz-option:nth-child(4) {
+        animation-delay: 0.15s;
+    }
+
+    .quiz-option:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px #2563eb12;
+    }
+
+    .quiz-option:not(:disabled):active {
+        transform: scale(0.99);
+    }
+
+    .quiz-option.answer-correct {
+        animation: quiz-correct 0.45s var(--quiz-ease) both;
+    }
+
+    .quiz-option.answer-wrong {
+        animation: quiz-shake 0.4s ease both;
+    }
+
+    .quiz-explanation {
+        animation: quiz-explanation-enter 0.45s var(--quiz-ease) both;
+    }
+
+    .quiz-status {
+        animation: quiz-pop 0.3s var(--quiz-ease) both;
+    }
+
+    .quiz-counter {
+        display: inline-flex;
+        height: 1.25em;
+        overflow: hidden;
+        vertical-align: bottom;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .quiz-counter-track {
+        display: flex;
+        flex-direction: column;
+        transform: translateY(calc(var(--digit, 0) * -1.25em));
+        transition: transform 0.55s var(--quiz-ease);
+    }
+
+    .quiz-counter {
+        display: inline-flex;
+        height: 1.25em;
+        overflow: hidden;
+        vertical-align: bottom;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.25;
+    }
+
+    .quiz-counter-digit {
+        display: inline-block;
+        min-width: 0.58em;
+        height: 1.25em;
+        line-height: 1.25;
+        animation: quiz-digit-enter 0.4s var(--quiz-ease) both;
+    }
+
+    @keyframes quiz-digit-enter {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .quiz-upload-zone {
+        transition:
+            transform 0.25s var(--quiz-ease),
+            border-color 0.25s ease,
+            background-color 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    .quiz-upload-zone:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px #2563eb0c;
+    }
+
+    .quiz-toggle-track {
+        transition:
+            background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 300ms ease;
+    }
+
+    .quiz-toggle-thumb {
+        transition:
+            transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+            box-shadow 250ms ease;
+        will-change: transform;
+    }
+
+    :global(#shuffle-exam:checked + .quiz-toggle-track) {
+        background-color: #2563eb;
+        box-shadow: 0 0 0 4px rgb(37 99 235 / 10%);
+    }
+
+    :global(#shuffle-exam:checked + .quiz-toggle-track .quiz-toggle-thumb) {
+        transform: translateX(20px);
+        box-shadow: 0 2px 5px rgb(15 23 42 / 20%);
+    }
+
+    :global(#shuffle-exam:focus-visible + .quiz-toggle-track) {
+        outline: 3px solid rgb(59 130 246 / 35%);
+        outline-offset: 3px;
+    }
+
+    .quiz-primary-button {
+        transition:
+            transform 0.2s var(--quiz-ease),
+            box-shadow 0.2s ease,
+            background-color 0.2s ease;
+    }
+
+    .quiz-primary-button:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px #2563eb30;
+    }
+
+    .quiz-review-button {
+        animation: quiz-pop 0.35s var(--quiz-ease) both;
+        transition:
+            transform 0.2s var(--quiz-ease),
+            box-shadow 0.2s ease;
+    }
+
+    .quiz-review-button:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 6px 14px #0f172a12;
+    }
+
+    @keyframes quiz-fade-down {
+        from {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes quiz-fade-up {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes quiz-card-enter {
+        from {
+            opacity: 0;
+            transform: translateY(18px) scale(0.99);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes quiz-correct {
+        0%,
+        100% {
+            transform: scale(1);
+        }
+        45% {
+            transform: scale(1.012);
+        }
+    }
+
+    @keyframes quiz-shake {
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+        25%,
+        75% {
+            transform: translateX(-4px);
+        }
+        50% {
+            transform: translateX(4px);
+        }
+    }
+
+    @keyframes quiz-explanation-enter {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes quiz-pop {
+        0% {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        70% {
+            opacity: 1;
+            transform: scale(1.04);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #driving-quiz *,
+        #driving-quiz *::before,
+        #driving-quiz *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+
+        .quiz-toggle-track,
+        .quiz-toggle-thumb {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    import confetti from "canvas-confetti";
+    import Swal from "sweetalert2";
+    import "sweetalert2/dist/sweetalert2.min.css";
+
+    type Question = {
+        id: number;
+        question: string;
+        answers: {
+            text: string;
+            correct: boolean;
+        }[];
+        explanation: string;
+    };
+
+    type ExamConfig = {
+        title: string;
+        allowedMistakes: number;
+        showExplanations: boolean;
+        allowReview: boolean;
+    };
+
+    const root = document.querySelector<HTMLElement>("#quiz-app");
+    const titleElement = document.querySelector<HTMLElement>("#exam-title");
+
+    let examConfig: ExamConfig | null = null;
+    let questionPool: Question[] = [];
+    let examQuestions: Question[] = [];
+    let responses: (number | null)[] = [];
+    let currentIndex = 0;
+    let finished = false;
+    let reviewMode = false;
+    let reviewIndex = 0;
+    let alertOpen = false;
+    let questionsFile: File | null = null;
+    let configFile: File | null = null;
+    let transitionLock = false;
+
+    const escapeHtml = (value: unknown) =>
+        String(value).replace(
+            /[&<>"']/g,
+            (char) =>
+                ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;",
+                })[char] ?? char,
+        );
+
+    const shuffle = <T,>(items: T[]): T[] => {
+        const result = [...items];
+
+        for (let i = result.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [result[i], result[j]] = [result[j], result[i]];
+        }
+
+        return result;
+    };
+
+    const correctCount = () =>
+        examQuestions.reduce((total, question, index) => {
+            const selected = responses[index];
+            return (
+                total +
+                (selected !== null && question.answers[selected]?.correct
+                    ? 1
+                    : 0)
+            );
+        }, 0);
+
+    const mistakes = () =>
+        responses.filter(
+            (answer, index) =>
+                answer !== null &&
+                !examQuestions[index].answers[answer]?.correct,
+        ).length;
+
+    const unansweredCount = () =>
+        responses.filter((answer) => answer === null).length;
+
+    const allAnswered = () =>
+        responses.length > 0 && responses.every((answer) => answer !== null);
+
+    const isPassed = () =>
+        examConfig !== null && mistakes() <= examConfig.allowedMistakes;
+
+    function animateTransition(callback: () => void) {
+        if (transitionLock) return;
+
+        transitionLock = true;
+        const card = root?.querySelector<HTMLElement>(".quiz-card");
+
+        if (!card) {
+            callback();
+            transitionLock = false;
+            return;
+        }
+
+        card.classList.add("quiz-card-exit");
+
+        window.setTimeout(() => {
+            callback();
+            transitionLock = false;
+        }, 150);
+    }
+
+    function renderUpload() {
+        if (!root) return;
+
+        root.innerHTML = `
+        <section class="quiz-card overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+          <div class="p-6 sm:p-10">
+            <div class="mb-6 flex size-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl">📚</div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Prepara tu examen</h2>
+            <p class="mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+              Selecciona los archivos de preguntas y configuración para preparar el simulacro.
+            </p>
+  
+            <form id="upload-form" class="mt-8 space-y-5">
+              <label for="questions-file" class="quiz-upload-zone flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:border-blue-500 hover:bg-blue-50/50">
+                <span class="text-3xl">📄</span>
+                <span class="mt-3 font-bold text-slate-800">Archivo de preguntas</span>
+                <span class="mt-1 text-sm text-slate-500">Selecciona questions.json</span>
+                <span id="questions-file-name" class="mt-3 break-all text-sm font-semibold text-blue-700">Ningún archivo seleccionado</span>
+                <input id="questions-file" type="file" accept=".json,application/json" class="sr-only" required />
+              </label>
+  
+              <label for="config-file" class="quiz-upload-zone flex cursor-pointer flex-col items-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center hover:border-blue-500 hover:bg-blue-50/50">
+                <span class="text-3xl">⚙️</span>
+                <span class="mt-3 font-bold text-slate-800">Configuración del examen</span>
+                <span class="mt-1 text-sm text-slate-500">Selecciona examen-config.json</span>
+                <span id="config-file-name" class="mt-3 break-all text-sm font-semibold text-blue-700">Ningún archivo seleccionado</span>
+                <input id="config-file" type="file" accept=".json,application/json" class="sr-only" required />
+              </label>
+  
+              <label for="shuffle-exam" class="group flex cursor-pointer items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-blue-300 hover:bg-blue-50/50">
+                <input id="shuffle-exam" type="checkbox" class="peer sr-only" />
+                <span class="quiz-toggle-track relative flex h-6 w-11 shrink-0 items-center rounded-full bg-slate-300 peer-checked:bg-blue-600 peer-focus-visible:ring-4 peer-focus-visible:ring-blue-200">
+                  <span class="quiz-toggle-thumb absolute left-1 size-4 rounded-full bg-white shadow"></span>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block font-bold text-slate-800">Orden aleatorio</span>
+                  <span class="mt-1 block text-sm leading-relaxed text-slate-500">Mezclar las preguntas y las respuestas al comenzar el examen.</span>
+                  <span class="mt-2 block text-xs font-medium text-blue-600">Desactivado: se respeta el orden original de los JSON.</span>
+                </span>
+                <span class="text-xl transition-transform duration-300 group-hover:rotate-12">🔀</span>
+              </label>
+  
+              <p id="file-error" role="alert" class="hidden rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700"></p>
+  
+              <button id="start-exam" type="submit" disabled class="quiz-primary-button w-full rounded-xl bg-blue-600 px-6 py-4 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40">
+                Cargar archivos y empezar examen →
+              </button>
+            </form>
+          </div>
+        </section>
+      `;
+
+        const questionsInput =
+            root.querySelector<HTMLInputElement>("#questions-file");
+        const configInput =
+            root.querySelector<HTMLInputElement>("#config-file");
+        const form = root.querySelector<HTMLFormElement>("#upload-form");
+        const startButton =
+            root.querySelector<HTMLButtonElement>("#start-exam");
+        const questionsLabel = root.querySelector<HTMLElement>(
+            "#questions-file-name",
+        );
+        const configLabel =
+            root.querySelector<HTMLElement>("#config-file-name");
+        const errorLabel = root.querySelector<HTMLElement>("#file-error");
+
+        const updateButton = () => {
+            if (startButton)
+                startButton.disabled = !questionsFile || !configFile;
+        };
+
+        const clearError = () => {
+            if (!errorLabel) return;
+            errorLabel.textContent = "";
+            errorLabel.classList.add("hidden");
+        };
+
+        questionsInput?.addEventListener("change", () => {
+            questionsFile = questionsInput.files?.[0] ?? null;
+            if (questionsLabel) {
+                questionsLabel.textContent =
+                    questionsFile?.name ?? "Ningún archivo seleccionado";
+            }
+            clearError();
+            updateButton();
+        });
+
+        configInput?.addEventListener("change", () => {
+            configFile = configInput.files?.[0] ?? null;
+            if (configLabel) {
+                configLabel.textContent =
+                    configFile?.name ?? "Ningún archivo seleccionado";
+            }
+            clearError();
+            updateButton();
+        });
+
+        form?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            if (!questionsFile || !configFile || !startButton) return;
+
+            const shuffleEnabled =
+                root.querySelector<HTMLInputElement>("#shuffle-exam")
+                    ?.checked ?? false;
+
+            startButton.disabled = true;
+            startButton.textContent = "Validando archivos…";
+            clearError();
+
+            try {
+                if (
+                    !questionsFile.name.toLowerCase().endsWith(".json") ||
+                    !configFile.name.toLowerCase().endsWith(".json")
+                ) {
+                    throw new Error(
+                        "Los dos archivos deben tener extensión .json.",
+                    );
+                }
+
+                if (
+                    questionsFile.size > 10 * 1024 * 1024 ||
+                    configFile.size > 1024 * 1024
+                ) {
+                    throw new Error(
+                        "El archivo de preguntas no puede superar 10 MB y la configuración no puede superar 1 MB.",
+                    );
+                }
+
+                const [questionsText, configText] = await Promise.all([
+                    questionsFile.text(),
+                    configFile.text(),
+                ]);
+
+                const parsedQuestions: unknown = JSON.parse(questionsText);
+                const parsedConfig: unknown = JSON.parse(configText);
+
+                if (
+                    !Array.isArray(parsedQuestions) ||
+                    parsedQuestions.length === 0
+                ) {
+                    throw new Error(
+                        "El archivo de preguntas debe contener una lista no vacía.",
+                    );
+                }
+
+                if (
+                    !parsedConfig ||
+                    typeof parsedConfig !== "object" ||
+                    Array.isArray(parsedConfig)
+                ) {
+                    throw new Error(
+                        "El archivo de configuración debe contener un objeto JSON.",
+                    );
+                }
+
+                const candidateConfig = parsedConfig as Record<string, unknown>;
+
+                if (
+                    typeof candidateConfig.title !== "string" ||
+                    candidateConfig.title.trim().length === 0 ||
+                    !Number.isInteger(candidateConfig.allowedMistakes) ||
+                    (candidateConfig.allowedMistakes as number) < 0 ||
+                    typeof candidateConfig.showExplanations !== "boolean" ||
+                    typeof candidateConfig.allowReview !== "boolean"
+                ) {
+                    throw new Error(
+                        "La configuración debe incluir title, allowedMistakes, showExplanations y allowReview con sus tipos correctos.",
+                    );
+                }
+
+                const validQuestions = parsedQuestions.every(
+                    (question: unknown) => {
+                        if (
+                            !question ||
+                            typeof question !== "object" ||
+                            Array.isArray(question)
+                        )
+                            return false;
+
+                        const q = question as Record<string, unknown>;
+
+                        if (
+                            typeof q.id !== "number" ||
+                            !Number.isFinite(q.id) ||
+                            typeof q.question !== "string" ||
+                            q.question.trim().length === 0 ||
+                            typeof q.explanation !== "string" ||
+                            !Array.isArray(q.answers) ||
+                            q.answers.length < 2
+                        )
+                            return false;
+
+                        return (
+                            q.answers.every((answer: unknown) => {
+                                if (
+                                    !answer ||
+                                    typeof answer !== "object" ||
+                                    Array.isArray(answer)
+                                )
+                                    return false;
+
+                                const a = answer as Record<string, unknown>;
+
+                                return (
+                                    typeof a.text === "string" &&
+                                    a.text.trim().length > 0 &&
+                                    typeof a.correct === "boolean"
+                                );
+                            }) &&
+                            q.answers.filter(
+                                (answer: { correct: boolean }) =>
+                                    answer.correct === true,
+                            ).length === 1
+                        );
+                    },
+                );
+
+                if (!validQuestions) {
+                    throw new Error(
+                        "El archivo de preguntas contiene datos inválidos. Cada pregunta necesita id, question, answers y explanation, con al menos dos respuestas y exactamente una correcta.",
+                    );
+                }
+
+                examConfig = {
+                    title: candidateConfig.title as string,
+                    allowedMistakes: candidateConfig.allowedMistakes as number,
+                    showExplanations:
+                        candidateConfig.showExplanations as boolean,
+                    allowReview: candidateConfig.allowReview as boolean,
+                };
+
+                questionPool = parsedQuestions as Question[];
+
+                const orderedQuestions = shuffleEnabled
+                    ? shuffle(questionPool)
+                    : [...questionPool];
+
+                examQuestions = orderedQuestions.map((question) => ({
+                    ...question,
+                    answers: shuffleEnabled
+                        ? shuffle(question.answers)
+                        : [...question.answers],
+                }));
+
+                responses = examQuestions.map(() => null);
+                currentIndex = 0;
+                finished = false;
+                reviewMode = false;
+                reviewIndex = 0;
+                transitionLock = false;
+
+                if (titleElement) titleElement.textContent = examConfig.title;
+
+                render();
+            } catch (error) {
+                if (errorLabel) {
+                    errorLabel.textContent =
+                        error instanceof Error
+                            ? error.message
+                            : "No se han podido cargar los archivos.";
+                    errorLabel.classList.remove("hidden");
+                }
+
+                startButton.disabled = false;
+                startButton.textContent = "Intentar de nuevo →";
+            }
+        });
+    }
+
+    function renderQuestion(index: number) {
+        if (!root || !examConfig) return;
+
+        const question = examQuestions[index];
+        const selectedAnswer = responses[index];
+        const answered = selectedAnswer !== null;
+        const isCorrect = answered && question.answers[selectedAnswer].correct;
+        const percentage = ((index + 1) / examQuestions.length) * 100;
+        const remaining = unansweredCount();
+
+        const statusClass = !answered
+            ? "bg-blue-50 text-blue-700"
+            : isCorrect
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-red-50 text-red-700";
+
+        const counterMarkup = (value: number) =>
+            `<span class="quiz-counter" aria-label="${value}">${String(value)
+                .split("")
+                .map(
+                    (digit, index) =>
+                        `<span class="quiz-counter-digit" style="animation-delay:${index * 60}ms">${digit}</span>`,
+                )
+                .join("")}</span>`;
+
+        root.innerHTML = `
+        <section class="quiz-condition mb-5 overflow-hidden rounded-2xl border border-blue-200 bg-blue-50/80 p-5 sm:p-6">
+          <div class="flex items-start gap-4">
+            <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-xl">📝</div>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-lg font-bold text-slate-900">Condiciones del examen</h2>
+              <p class="mt-1 text-sm leading-relaxed text-slate-600">
+                Este examen consta de <strong class="text-slate-900">${examQuestions.length} preguntas</strong>
+                y puedes cometer como máximo
+                <strong class="text-slate-900">${examConfig.allowedMistakes} ${examConfig.allowedMistakes === 1 ? "fallo" : "fallos"}</strong>
+                para obtener el resultado de APTO.
+              </p>
+            </div>
+          </div>
+  
+          <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div class="quiz-stat rounded-xl border border-blue-100 bg-white p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total preguntas</p>
+              <p class="mt-1 text-2xl font-black text-slate-900">${examQuestions.length}</p>
+            </div>
+            <div class="quiz-stat rounded-xl border border-blue-100 bg-white p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fallos permitidos</p>
+              <p class="mt-1 text-2xl font-black text-slate-900">${examConfig.allowedMistakes}</p>
+            </div>
+            <div class="quiz-stat rounded-xl border border-blue-100 bg-white p-4">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Preguntas pendientes</p>
+              <p class="mt-1 flex items-baseline gap-1 text-2xl font-black text-slate-900">
+                ${counterMarkup(remaining)}
+                <span class="text-sm font-medium text-slate-400">de ${examQuestions.length}</span>
+              </p>
+            </div>
+          </div>
+        </section>
+  
+        <section class="quiz-card overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+          <div class="border-b border-slate-100 px-5 py-5 sm:px-8">
+            <div class="mb-3 flex items-center justify-between gap-3 text-sm">
+              <span class="font-semibold text-slate-500">Pregunta ${index + 1} de ${examQuestions.length}</span>
+              <span class="quiz-status rounded-full px-3 py-1 font-semibold ${statusClass}">
+                ${!answered ? "Pendiente" : isCorrect ? "Correcta" : "Incorrecta"}
+              </span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div class="h-full rounded-full bg-blue-600 transition-all duration-500" style="width:${percentage}%"></div>
+            </div>
+          </div>
+  
+          <div class="p-5 sm:p-8">
+            <p class="mb-3 text-sm font-medium text-slate-400">Lee atentamente</p>
+            <h2 class="text-xl font-bold leading-relaxed text-slate-900 sm:text-2xl">${escapeHtml(question.question)}</h2>
+  
+            <div class="mt-7 grid gap-3">
+              ${question.answers
+                  .map((answer, answerIndex) => {
+                      const isSelected = selectedAnswer === answerIndex;
+                      const isRightAnswer = answered && answer.correct;
+
+                      let answerClass =
+                          "border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50";
+                      let markerClass = "border-slate-300 text-slate-500";
+                      let animationClass = "";
+
+                      if (answered && isRightAnswer) {
+                          answerClass =
+                              "border-emerald-500 bg-emerald-50 text-emerald-950";
+                          markerClass =
+                              "border-emerald-600 bg-emerald-600 text-white";
+                          animationClass = "answer-correct";
+                      } else if (answered && isSelected && !isCorrect) {
+                          answerClass = "border-red-500 bg-red-50 text-red-950";
+                          markerClass = "border-red-600 bg-red-600 text-white";
+                          animationClass = "answer-wrong";
+                      } else if (answered) {
+                          answerClass =
+                              "border-slate-200 bg-slate-50 text-slate-400 opacity-70";
+                      }
+
+                      return `
+                  <button type="button" data-answer="${answerIndex}" ${answered ? "disabled" : ""} class="quiz-option flex w-full items-start gap-4 rounded-2xl border-2 p-4 text-left ${answerClass} ${animationClass} ${answered ? "cursor-default" : "cursor-pointer"}">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-xl border font-bold ${markerClass}">
+                      ${answered && isRightAnswer ? "✓" : answered && isSelected ? "✕" : String.fromCharCode(65 + answerIndex)}
+                    </span>
+                    <span class="flex-1 pt-1 text-sm font-medium leading-relaxed sm:text-base">${escapeHtml(answer.text)}</span>
+                    ${answered && isRightAnswer ? '<span class="text-lg font-bold text-emerald-600">✓</span>' : ""}
+                  </button>
+                `;
+                  })
+                  .join("")}
+            </div>
+  
+            ${
+                answered && examConfig.showExplanations
+                    ? `
+              <div class="quiz-explanation mt-6 rounded-2xl border ${isCorrect ? "border-emerald-200 bg-emerald-50/70" : "border-red-200 bg-red-50/70"} p-5">
+                <div class="mb-2 flex items-center gap-2">
+                  <span class="text-lg">${isCorrect ? "✓" : "ℹ"}</span>
+                  <h3 class="font-bold ${isCorrect ? "text-emerald-800" : "text-red-800"}">${isCorrect ? "¡Muy bien!" : "Repasa esta pregunta"}</h3>
+                </div>
+                <p class="text-sm leading-relaxed text-slate-700">${escapeHtml(question.explanation)}</p>
+              </div>
+            `
+                    : ""
+            }
+  
+            ${!answered ? '<p class="mt-5 text-sm text-slate-400">Selecciona una respuesta para desbloquear la explicación y continuar.</p>' : ""}
+          </div>
+  
+          <div class="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/70 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <button type="button" data-action="previous" ${index === 0 ? "disabled" : ""} class="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40">
+              ← Anterior
+            </button>
+            <button type="button" data-action="${reviewMode ? (index === examQuestions.length - 1 ? "back-results" : "review-next") : index === examQuestions.length - 1 ? "finish" : "next"}" ${!answered && !reviewMode ? "disabled" : ""} class="quiz-primary-button rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40">
+              ${reviewMode ? (index === examQuestions.length - 1 ? "Volver al resultado" : "Siguiente pregunta →") : index === examQuestions.length - 1 ? "Ver resultado final →" : "Siguiente pregunta →"}
+            </button>
+          </div>
+        </section>
+      `;
+
+        root.querySelectorAll<HTMLButtonElement>("[data-answer]").forEach(
+            (button) => {
+                button.addEventListener("click", async () => {
+                    if (responses[index] !== null || reviewMode || alertOpen)
+                        return;
+
+                    const answerIndex = Number(button.dataset.answer);
+                    const answer = question.answers[answerIndex];
+                    if (!answer) return;
+
+                    responses[index] = answerIndex;
+
+                    if (answer.correct) {
+                        confetti({
+                            particleCount: 120,
+                            spread: 75,
+                            origin: { y: 0.65 },
+                            colors: [
+                                "#10b981",
+                                "#34d399",
+                                "#fbbf24",
+                                "#60a5fa",
+                            ],
+                        });
+                        render();
+                    } else {
+                        alertOpen = true;
+
+                        try {
+                            await Swal.fire({
+                                title: "¡Ups! Respuesta incorrecta",
+                                text: "Revisa la explicación para aprender de este error.",
+                                icon: "error",
+                                confirmButtonText: "Ver explicación",
+                                confirmButtonColor: "#dc2626",
+                                showClass: {
+                                    popup: "animate-jump-in animate-duration-300",
+                                },
+                                hideClass: {
+                                    popup: "animate-fade-out animate-duration-150",
+                                },
+                            });
+                        } finally {
+                            alertOpen = false;
+                            render();
+                        }
+                    }
+                });
+            },
+        );
+
+        root.querySelector('[data-action="previous"]')?.addEventListener(
+            "click",
+            () => {
+                if (index <= 0) return;
+
+                animateTransition(() => {
+                    if (reviewMode) reviewIndex = index - 1;
+                    else currentIndex = index - 1;
+                    render();
+                });
+            },
+        );
+
+        root.querySelector('[data-action="next"]')?.addEventListener(
+            "click",
+            () => {
+                if (!answered || index >= examQuestions.length - 1) return;
+
+                animateTransition(() => {
+                    currentIndex = index + 1;
+                    render();
+                });
+            },
+        );
+
+        root.querySelector('[data-action="review-next"]')?.addEventListener(
+            "click",
+            () => {
+                if (!reviewMode || reviewIndex >= examQuestions.length - 1)
+                    return;
+
+                animateTransition(() => {
+                    reviewIndex++;
+                    render();
+                });
+            },
+        );
+
+        root.querySelector('[data-action="finish"]')?.addEventListener(
+            "click",
+            () => {
+                if (!allAnswered()) return;
+
+                animateTransition(() => {
+                    finished = true;
+                    reviewMode = false;
+                    render();
+                });
+            },
+        );
+
+        root.querySelector('[data-action="back-results"]')?.addEventListener(
+            "click",
+            () => {
+                animateTransition(() => {
+                    reviewMode = false;
+                    finished = true;
+                    render();
+                });
+            },
+        );
+    }
+
+    function renderResults() {
+        if (!root || !examConfig) return;
+
+        const correct = correctCount();
+        const wrong = mistakes();
+        const total = examQuestions.length;
+        const percentage = Math.round((correct / total) * 100);
+        const passed = isPassed();
+
+        root.innerHTML = `
+        <section class="quiz-result overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+          <div class="${passed ? "bg-emerald-600" : "bg-red-600"} px-6 py-9 text-center text-white sm:px-10 sm:py-12">
+            <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-white/15 text-3xl">${passed ? "🏆" : "📚"}</div>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Examen finalizado</p>
+            <h2 class="mt-3 text-4xl font-black tracking-tight sm:text-5xl">${passed ? "¡APTO!" : "NO APTO"}</h2>
+            <p class="mt-3 text-base text-white/90">${passed ? "¡Enhorabuena! Has superado el simulacro." : "Repasa tus errores y vuelve a intentarlo."}</p>
+          </div>
+  
+          <div class="grid grid-cols-2 gap-3 p-5 sm:grid-cols-4 sm:p-8">
+            <div class="quiz-stat rounded-2xl bg-slate-50 p-4 text-center"><p class="text-sm text-slate-500">Nota</p><p class="mt-2 text-3xl font-black text-slate-900">${percentage}%</p></div>
+            <div class="quiz-stat rounded-2xl bg-emerald-50 p-4 text-center"><p class="text-sm text-emerald-700">Aciertos</p><p class="mt-2 text-3xl font-black text-emerald-700">${correct}</p></div>
+            <div class="quiz-stat rounded-2xl bg-red-50 p-4 text-center"><p class="text-sm text-red-700">Fallos</p><p class="mt-2 text-3xl font-black text-red-700">${wrong}</p></div>
+            <div class="quiz-stat rounded-2xl bg-blue-50 p-4 text-center"><p class="text-sm text-blue-700">Permitidos</p><p class="mt-2 text-3xl font-black text-blue-700">${examConfig.allowedMistakes}</p></div>
+          </div>
+  
+          <div class="px-5 pb-6 sm:px-8 sm:pb-8">
+            <h3 class="text-lg font-bold text-slate-900">Revisa tus preguntas</h3>
+            <p class="mt-1 text-sm leading-relaxed text-slate-500">Pulsa cualquier número para consultar tu respuesta y la explicación.</p>
+  
+            <div class="mt-5 grid grid-cols-5 gap-2 sm:grid-cols-10">
+              ${examQuestions
+                  .map((question, index) => {
+                      const answer = responses[index];
+                      const isCorrect =
+                          answer !== null && question.answers[answer].correct;
+
+                      return `
+                  <button type="button" data-review="${index}" aria-label="Revisar pregunta ${index + 1}" style="animation-delay:${Math.min(index * 30, 300)}ms" class="quiz-review-button flex aspect-square items-center justify-center rounded-xl border-2 text-sm font-bold ${isCorrect ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"}">
+                    ${index + 1}
+                  </button>
+                `;
+                  })
+                  .join("")}
+            </div>
+  
+            <div class="mt-4 flex flex-wrap gap-4 text-xs font-medium text-slate-500">
+              <span class="flex items-center gap-2"><span class="size-3 rounded-sm bg-emerald-500"></span> Correcta</span>
+              <span class="flex items-center gap-2"><span class="size-3 rounded-sm bg-red-500"></span> Fallada</span>
+            </div>
+  
+            <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+              <button type="button" data-action="retry" class="quiz-primary-button flex-1 rounded-xl bg-blue-600 px-6 py-3.5 font-bold text-white hover:bg-blue-700">↻ Repetir examen</button>
+              <button type="button" data-action="review-wrong" ${wrong === 0 || !examConfig.allowReview ? "disabled" : ""} class="flex-1 rounded-xl border border-slate-200 bg-white px-6 py-3.5 font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Repasar fallos (${wrong})</button>
+              <button type="button" data-action="new-file" class="flex-1 rounded-xl border border-slate-200 bg-white px-6 py-3.5 font-bold text-slate-700 transition hover:bg-slate-50">Cargar otro examen</button>
+            </div>
+          </div>
+        </section>
+      `;
+
+        root.querySelectorAll<HTMLButtonElement>("[data-review]").forEach(
+            (button) => {
+                button.addEventListener("click", () => {
+                    if (!examConfig?.allowReview) return;
+
+                    reviewIndex = Number(button.dataset.review);
+                    reviewMode = true;
+                    render();
+                });
+            },
+        );
+
+        root.querySelector('[data-action="review-wrong"]')?.addEventListener(
+            "click",
+            () => {
+                if (!examConfig?.allowReview || wrong === 0) return;
+
+                const firstWrong = responses.findIndex(
+                    (answer, index) =>
+                        answer !== null &&
+                        !examQuestions[index].answers[answer].correct,
+                );
+
+                if (firstWrong >= 0) {
+                    reviewIndex = firstWrong;
+                    reviewMode = true;
+                    render();
+                }
+            },
+        );
+
+        root.querySelector('[data-action="retry"]')?.addEventListener(
+            "click",
+            () => {
+                responses.fill(null);
+                currentIndex = 0;
+                finished = false;
+                reviewMode = false;
+                reviewIndex = 0;
+                transitionLock = false;
+                render();
+            },
+        );
+
+        root.querySelector('[data-action="new-file"]')?.addEventListener(
+            "click",
+            () => {
+                examConfig = null;
+                questionPool = [];
+                examQuestions = [];
+                responses = [];
+                currentIndex = 0;
+                finished = false;
+                reviewMode = false;
+                reviewIndex = 0;
+                questionsFile = null;
+                configFile = null;
+                transitionLock = false;
+
+                if (titleElement) titleElement.textContent = "Examen teórico";
+
+                renderUpload();
+            },
+        );
+
+        if (passed) {
+            confetti({
+                particleCount: 180,
+                spread: 100,
+                origin: { y: 0.55 },
+                colors: ["#10b981", "#34d399", "#fbbf24", "#60a5fa"],
+            });
+        }
+    }
+
+    function render() {
+        if (!root) return;
+
+        if (examQuestions.length === 0 || !examConfig) {
+            renderUpload();
+        } else if (finished && !reviewMode) {
+            renderResults();
+        } else {
+            renderQuestion(reviewMode ? reviewIndex : currentIndex);
+        }
+    }
+
+    render();
+</script>

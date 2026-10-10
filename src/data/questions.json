@@ -1,0 +1,192 @@
+[
+    {
+        "id": 1,
+        "question": "¿Qué se entiende por distancia de detención?",
+        "answers": [
+            {
+                "text": "La distancia recorrida desde que se pisa el freno hasta que el vehículo se detiene",
+                "correct": false
+            },
+            {
+                "text": "La suma de la distancia de reacción y la distancia de frenado",
+                "correct": true
+            },
+            {
+                "text": "La distancia que debe mantenerse con el vehículo precedente",
+                "correct": false
+            }
+        ],
+        "explanation": "La distancia de detención es la suma de la distancia de reacción, recorrida desde que se percibe un peligro hasta que se empieza a frenar, y la distancia de frenado, recorrida desde que se acciona el freno hasta que el vehículo se detiene."
+    },
+    {
+        "id": 2,
+        "question": "¿De qué depende principalmente la distancia de reacción?",
+        "answers": [
+            {
+                "text": "De la velocidad del vehículo y del tiempo de reacción del conductor",
+                "correct": true
+            },
+            {
+                "text": "Únicamente del estado de los neumáticos",
+                "correct": false
+            },
+            {
+                "text": "Exclusivamente de la potencia del motor",
+                "correct": false
+            }
+        ],
+        "explanation": "La distancia de reacción depende de la velocidad a la que se circula y del tiempo que tarda el conductor en reaccionar. La fatiga, las distracciones, el alcohol y otras sustancias pueden aumentar el tiempo de reacción."
+    },
+    {
+        "id": 3,
+        "question": "Si duplica la velocidad, ¿qué sucede aproximadamente con la distancia de frenado en las mismas condiciones?",
+        "answers": [
+            {
+                "text": "Se duplica",
+                "correct": false
+            },
+            {
+                "text": "Se cuadruplica",
+                "correct": true
+            },
+            {
+                "text": "Permanece igual",
+                "correct": false
+            }
+        ],
+        "explanation": "En condiciones equivalentes, la distancia de frenado aumenta aproximadamente con el cuadrado de la velocidad. Por eso, duplicar la velocidad puede multiplicar por cuatro la distancia de frenado."
+    },
+    {
+        "id": 4,
+        "question": "¿Cómo afecta la lluvia a la distancia de frenado?",
+        "answers": [
+            {
+                "text": "La reduce porque los neumáticos se enfrían",
+                "correct": false
+            },
+            {
+                "text": "No la modifica si el vehículo tiene ABS",
+                "correct": false
+            },
+            {
+                "text": "Generalmente la aumenta porque disminuye la adherencia",
+                "correct": true
+            }
+        ],
+        "explanation": "Con la calzada mojada suele disminuir la adherencia entre los neumáticos y el pavimento, por lo que la distancia de frenado puede aumentar. Debe reducirse la velocidad y aumentar la distancia de seguridad."
+    },
+    {
+        "id": 5,
+        "question": "Circulando a 90 km/h, ¿cuántos metros recorre aproximadamente durante un segundo de reacción?",
+        "answers": [
+            {
+                "text": "9 metros",
+                "correct": false
+            },
+            {
+                "text": "25 metros",
+                "correct": true
+            },
+            {
+                "text": "90 metros",
+                "correct": false
+            }
+        ],
+        "explanation": "Para convertir km/h a m/s se divide entre 3,6. A 90 km/h se recorren 25 metros por segundo. Si el tiempo de reacción es de un segundo, esa será aproximadamente la distancia recorrida antes de empezar a frenar."
+    },
+    {
+        "id": 6,
+        "question": "¿Qué ocurre con la distancia de detención si el conductor circula más rápido?",
+        "answers": [
+            {
+                "text": "Aumenta, tanto por la distancia de reacción como por la de frenado",
+                "correct": true
+            },
+            {
+                "text": "Solo aumenta la distancia de reacción",
+                "correct": false
+            },
+            {
+                "text": "Disminuye porque el vehículo recorre más metros en menos tiempo",
+                "correct": false
+            }
+        ],
+        "explanation": "Al aumentar la velocidad, aumenta la distancia recorrida durante el tiempo de reacción y también crece considerablemente la distancia de frenado. Por tanto, la distancia total de detención aumenta."
+    },
+    {
+        "id": 7,
+        "question": "¿Cuál es la velocidad máxima genérica para un turismo en una autopista o autovía dentro de poblado, salvo señalización específica?",
+        "answers": [
+            {
+                "text": "120 km/h",
+                "correct": false
+            },
+            {
+                "text": "80 km/h",
+                "correct": false
+            },
+            {
+                "text": "La que corresponda según la señalización y las normas aplicables a esa vía",
+                "correct": true
+            }
+        ],
+        "explanation": "No debe aplicarse automáticamente el límite genérico de 120 km/h a cualquier autopista o autovía. La velocidad debe ajustarse a la señalización, a las normas aplicables al tramo y a las circunstancias de la circulación."
+    },
+    {
+        "id": 8,
+        "question": "Como norma general, ¿cuál es la velocidad máxima genérica de un turismo en una carretera convencional?",
+        "answers": [
+            {
+                "text": "90 km/h",
+                "correct": true
+            },
+            {
+                "text": "100 km/h",
+                "correct": false
+            },
+            {
+                "text": "120 km/h",
+                "correct": false
+            }
+        ],
+        "explanation": "Para los turismos, el límite máximo genérico en carreteras convencionales es de 90 km/h, sin perjuicio de los límites específicos señalizados y de la obligación de adaptar la velocidad a las circunstancias."
+    },
+    {
+        "id": 9,
+        "question": "¿Qué debe hacer si circula a la velocidad máxima permitida y aparece niebla densa?",
+        "answers": [
+            {
+                "text": "Mantener la velocidad porque ya circula dentro del límite",
+                "correct": false
+            },
+            {
+                "text": "Reducir la velocidad para poder detenerse dentro de la zona visible y aumentar la distancia de seguridad",
+                "correct": true
+            },
+            {
+                "text": "Aumentar la velocidad para atravesar rápidamente la zona de niebla",
+                "correct": false
+            }
+        ],
+        "explanation": "Los límites de velocidad no garantizan que esa velocidad sea segura en todas las circunstancias. Con niebla debe adaptarse la velocidad a la visibilidad y a la adherencia, de modo que sea posible detenerse dentro de la distancia visible."
+    },
+    {
+        "id": 10,
+        "question": "¿Qué efecto tiene el alcohol sobre la distancia de detención?",
+        "answers": [
+            {
+                "text": "Puede aumentar la distancia de reacción al empeorar la atención y la capacidad de respuesta",
+                "correct": true
+            },
+            {
+                "text": "Reduce la distancia de frenado porque el conductor pisa el freno con más fuerza",
+                "correct": false
+            },
+            {
+                "text": "No tiene efecto si se circula por debajo de 50 km/h",
+                "correct": false
+            }
+        ],
+        "explanation": "El alcohol deteriora la atención, la percepción del riesgo y el tiempo de reacción. Esto puede aumentar la distancia de reacción y, por tanto, la distancia total de detención, además de elevar el riesgo de accidente."
+    }
+]
